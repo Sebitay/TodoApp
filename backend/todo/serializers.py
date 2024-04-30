@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import TodoItem, TodoGroup, Subtask
+from django.contrib.auth.models import User
 
 
 def create_serializer_class(name, fields):
@@ -15,6 +16,12 @@ def inline_serializer(*, fields, data=None, **kwargs):
 
 class StringListField(serializers.ListField):
     child = serializers.CharField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
 
 class GroupInputSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=256)
