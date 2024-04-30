@@ -3,7 +3,8 @@ from django.db import models
 class TodoGroup(models.Model):
     name = models.CharField(max_length=256)
     todos = models.ManyToManyField('TodoItem', blank=True)
-    groups = models.ManyToManyField('self', blank=True, default=None, symmetrical=False)
+    childs = models.ManyToManyField('self', blank=True, default=None, symmetrical=False, related_name='group_childs')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, default=None, related_name='group_parent')
     def __str__(self):
         return self.name
     

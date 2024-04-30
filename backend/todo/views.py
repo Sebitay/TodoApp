@@ -48,6 +48,15 @@ class TodoItemDetailView(APIView):
         serializer = TodoOutputSerializer(todo_item)
         return Response(serializer.data)
     
+    def post(self, request, id):
+        todo_item = TodoItem.objects.get(id=id)
+        serializer = SubtaskInputSerializer(data=request.data)
+        if serializer.is_valid():
+            content = request.data['content']
+            TodoItemService.add_subtask(todo_item, content)
+            return Response({'success': 'Subtask added successfully'}, status=201)
+        return Response(serializer.errors, status=400)
+    
     def put(self, request, id):
         todo_item = TodoItem.objects.get(id=id)
         serializer = TodoInputSerializer(todo_item, data=request.data)
@@ -72,6 +81,10 @@ class TodoItemActionView(APIView):
             TodoItemService.check(todo)
         elif action == 'uncheck':
             TodoItemService.uncheck(todo)
+        elif action == 'move':
+            old_group = content['old_group']
+            new_group = content['new_group']
+            TodoItemService.move(old_group, new_group, todo)
         else:
             return Response({'error': 'Invalid action'}, status=400)
         return Response({'success': action +' performed successfully'}, status=200)
@@ -90,6 +103,14 @@ class TodoGroupListView(APIView):
             TodoGroupService.create(**serializer.validated_data)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+    
+class TodoGroupFilterView(APIView):
+    def get(self, request):
+        todos = TodoGroup.objects.all()
+        groups = request.data.get('groups', None)
+        todos = todos.filter(Q(groups=groups))
+        serializer = GroupOutputSerializer(todos, many=True)
+        return Response(serializer.data)
 
 class TodoGroupDetailView(APIView):
     def get(self, request, id):
@@ -108,7 +129,7 @@ class TodoGroupDetailView(APIView):
     def delete(self, request, id):
         todo_group = TodoGroup.objects.get(id=id)
         todo_group.delete()
-        return Response({'success': 'Group deleted successfully'},status=204)
+        return Response({'success': 'Group deleted successfully'}, status=204)
 
 class TodoGroupActionView(APIView):
     def post(self, request, id):
@@ -125,6 +146,10 @@ class TodoGroupActionView(APIView):
             TodoGroupService.add_group(group, content)
         elif action == 'remove_group':
             TodoGroupService.remove_group(group, content)
+        elif action == 'move_group':
+            old_group = content['old_group']
+            new_group = content['new_group']
+            TodoGroupService.move_group(old_group, new_group, group)
         else:
             return Response({'error': 'Invalid action'}, status=400)
         return Response({'success': action +' performed successfully'}, status=200)
@@ -150,3 +175,26 @@ class TodoSubtaskActionView(APIView):
         subtask.delete()
         return Response({'success': 'Subtask deleted successfully'},status=204)
     
+class TodoSubtaskActionView(APIView):
+    def post(self, request, id):
+        subtask = Subtask.objects.get(id=id)
+        action = request.data['action']
+        content = request.data['content']
+        if action == 'rename':
+            SubtaskService.rename(subtask, content)
+        elif action == 'check':
+            SubtaskService.check(subtask)
+        elif action == 'uncheck':
+            SubtaskService.uncheck(subtask)
+        elif action == 'remove':
+            SubtaskService.remove(subtask)
+        elif action == 'move':
+            SubtaskService.move(subtask, int(content))
+        else:
+            return Response({'error': 'Invalid action'}, status=400)
+        return Response({'success': action +' performed successfully'}, status=200)
+    
+    def delete(self, request, id):
+        subtask = Subtask.objects.get(id=id)
+        subtask.delete()
+        return Response({'success': 'Subtask deleted successfully'},status=204)

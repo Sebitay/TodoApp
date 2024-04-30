@@ -13,13 +13,13 @@ def inline_serializer(*, fields, data=None, **kwargs):
 
     return serializer_class(**kwargs)
 
-
 class StringListField(serializers.ListField):
     child = serializers.CharField()
 
 class GroupInputSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=256)
-    groups = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all(), many=True)
+    childs = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all(), many=True)
+    parent = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all(), required=False)
     todos = serializers.PrimaryKeyRelatedField(queryset=TodoItem.objects.all(), many=True)
 
 class TodoInputSerializer(serializers.Serializer):
@@ -28,12 +28,10 @@ class TodoInputSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField()
     date = serializers.DateField()
     checked = serializers.BooleanField()
-    group = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all())
+    group = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all(), required=False)
     subtasks = StringListField()
 
 class SubtaskInputSerializer(serializers.Serializer):
-    todo = serializers.PrimaryKeyRelatedField(queryset=TodoItem.objects.all())
-    index = serializers.IntegerField()
     content = serializers.CharField(max_length=256)
 
 
@@ -46,7 +44,8 @@ class SubtaskOutputSerializer(serializers.Serializer):
 class GroupOutputSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField(max_length=256)
-    groups = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all(), many=True)
+    childs = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all(), many=True)
+    parent = serializers.PrimaryKeyRelatedField(queryset=TodoGroup.objects.all())
     todos = serializers.PrimaryKeyRelatedField(queryset=TodoItem.objects.all(), many=True)
 
 class TodoOutputSerializer(serializers.Serializer):

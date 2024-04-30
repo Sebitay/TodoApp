@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from todo.views import TodoItemListView, TodoItemDetailView, TodoGroupListView, TodoGroupDetailView, TodoGroupActionView, TodoItemFilterView, TodoItemActionView
+from todo.views import TodoItemListView, TodoItemDetailView, TodoGroupListView, TodoGroupDetailView, TodoGroupFilterView ,TodoGroupActionView, TodoItemFilterView, TodoItemActionView, TodoSubtaskActionView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,7 +24,9 @@ urlpatterns = [
     path('todos/<int:id>/', TodoItemDetailView.as_view(), name='todo-detail'),
     path('todos/filter/', TodoItemFilterView.as_view(), name='todo-filter'),
     path('todos/<int:id>/action/', TodoItemActionView.as_view(), name='todo-action'),
+    path('subtask/<int:id>/', TodoSubtaskActionView.as_view(), name='subtask-action'),
     path('groups/', TodoGroupListView.as_view(), name='group-list'),
     path('groups/<int:id>/', TodoGroupDetailView.as_view(), name='group-detail'),
-    path('groups/<int:id>/action/', TodoGroupActionView.as_view(), name='group-action')
+    path('groups/filter/', TodoGroupFilterView.as_view(), name='group-filter'),
+    path('groups/<int:id>/action/', TodoGroupActionView.as_view(), name='group-action'),
 ]
