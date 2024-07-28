@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { StatusBar } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { withExpoSnack } from 'nativewind';
 import * as SecureStore from 'expo-secure-store';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from "./screens/auth/Login";
 import Register from "./screens/auth/Register";
-import { LOGIN_URL, TEST_TOKEN_URL } from "../constants/Urls";
+import { LOGIN_URL, TEST_TOKEN_URL, REGISTER_URL } from "../constants/Urls";
 import Home from './screens/main/Home';
 import { AuthContext } from '@/context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+function App() {
     const [state, dispatch] = React.useReducer(
         (prevState, action) => {
             switch (action.type) {
@@ -104,18 +104,23 @@ export default function App() {
             SecureStore.deleteItemAsync('userToken');
         },
 
-        signUp: async (data) => {
-            // Send register
-
-            // Save token in secure store
-
-            dispatch({ type: 'SIGN_IN', token: 'dummy-auth-token' });
+        signUp: async ({username, email, password}) => {
+            const res = await fetch(REGISTER_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({username, email, password})
+            }).then(res => res.json());
+            if (res.token) {
+                await SecureStore.setItemAsync('userToken', res.token);
+                dispatch({ type: 'SIGN_IN', token: res.token });
+            }
         },
     }), []);
     
     return (
         <AuthContext.Provider value={authContext}>
-                <StatusBar barStyle="dark-content" backgroundColor="#ecf0f1" />
                 <Stack.Navigator screenOptions={{headerShown: false, backgroundColor: "#ecf0f1"}}>
                     {state.userToken == null ? (
                         <>
@@ -124,7 +129,11 @@ export default function App() {
                                 component={Login} 
                                 initialParams={{ text: state.message }}
                             />
-                            <Stack.Screen name="Register" component={Register} />
+                            <Stack.Screen 
+                                name="Register" 
+                                component={Register} 
+                                initialParams={{ text: {username: "", email: "", password: "", rePassword: ""} }}
+                            />
                         </>
                     ) : (
                         <Stack.Screen name="Home" component={Home} />
@@ -133,3 +142,5 @@ export default function App() {
         </AuthContext.Provider>
     );
 }
+
+export default withExpoSnack(App);
