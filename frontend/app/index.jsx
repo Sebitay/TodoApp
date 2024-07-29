@@ -2,14 +2,11 @@ import * as React from 'react';
 import { StatusBar } from 'react-native';
 import { withExpoSnack } from 'nativewind';
 import * as SecureStore from 'expo-secure-store';
-import Login from "./screens/auth/Login";
-import Register from "./screens/auth/Register";
 import { LOGIN_URL, TEST_TOKEN_URL, REGISTER_URL } from "../constants/Urls";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Daily from './screens/main/Daily';
-import Groups from './screens/main/Groups';
 import { AuthContext } from '@/context/AuthContext';
+import { Login, Register, Daily, Groups } from '@/screens';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
