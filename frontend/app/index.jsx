@@ -2,14 +2,17 @@ import * as React from 'react';
 import { StatusBar } from 'react-native';
 import { withExpoSnack } from 'nativewind';
 import * as SecureStore from 'expo-secure-store';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from "./screens/auth/Login";
 import Register from "./screens/auth/Register";
 import { LOGIN_URL, TEST_TOKEN_URL, REGISTER_URL } from "../constants/Urls";
-import Home from './screens/main/Home';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Daily from './screens/main/Daily';
+import Groups from './screens/main/Groups';
 import { AuthContext } from '@/context/AuthContext';
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function App() {
     const [state, dispatch] = React.useReducer(
@@ -118,27 +121,27 @@ function App() {
             }
         },
     }), []);
-    
     return (
         <AuthContext.Provider value={authContext}>
-                <Stack.Navigator screenOptions={{headerShown: false, backgroundColor: "#ecf0f1"}}>
-                    {state.userToken == null ? (
-                        <>
-                            <Stack.Screen 
-                                name="Login" 
-                                component={Login} 
-                                initialParams={{ text: state.message }}
-                            />
-                            <Stack.Screen 
-                                name="Register" 
-                                component={Register} 
-                                initialParams={{ text: {username: "", email: "", password: "", rePassword: ""} }}
-                            />
-                        </>
-                    ) : (
-                        <Stack.Screen name="Home" component={Home} />
-                    )}
+            {state.userToken == null ? (
+                <Stack.Navigator screenOptions={{headerShown: false, backgroundColor: "white"}}>
+                    <Stack.Screen 
+                        name="Login" 
+                        component={Login} 
+                        initialParams={{ text: state.message }}
+                    />
+                    <Stack.Screen 
+                        name="Register" 
+                        component={Register} 
+                        initialParams={{ text: {username: "", email: "", password: "", rePassword: ""} }}
+                    />
                 </Stack.Navigator>
+            ) : (
+                <Tab.Navigator screenOptions={{headerShown: false}}>
+                    <Tab.Screen name="Daily" component={Daily} />
+                    <Tab.Screen name="Groups" component={Groups} />
+                </Tab.Navigator>
+            )}
         </AuthContext.Provider>
     );
 }
